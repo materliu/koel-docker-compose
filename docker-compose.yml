@@ -63,6 +63,19 @@ services:
       MYSQL_USER: koel
       MYSQL_PASSWORD: koel
 
+  dbviewer:
+    image: phpmyadmin
+    container_name: koel_db_viewer  
+    links:
+      - database
+    restart: always
+    ports:
+      - 10083:80
+    environment:
+      - PMA_HOST=database
+      - PMA_USER=koel
+      - PMA_PASSWORD=koel
+
 volumes:
   db:
     driver: local
