@@ -2,23 +2,24 @@ version: '3.4'
 
 services:
   koel:
-    image: nairvish/docker-koel
+    image: phanan/koel:latest
     container_name: "koel_base"
     restart: always
     depends_on:
       - database
     ports:
-      - 3006:80
+      - 10084:80
     environment:
       DB_CONNECTION: mysql
       DB_HOST: database
       DB_USERNAME: koel
       DB_PASSWORD: koel
       DB_DATABASE: koel
+      FORCE_HTTPS: false
       IGNORE_DOT_FILES: 'true'
       APP_ENV: production
       APP_DEBUG: 'true'
-      APP_URL: http://koel.mater.io
+      APP_URL: http://localhost:10084/
       APP_MAX_SCAN_TIME: 600
       MEMORY_LIMIT: 2048
       STREAMING_METHOD: php
@@ -48,15 +49,21 @@ services:
       # PUSHER_APP_SECRET=
       # PUSHER_APP_CLUSTER=
     volumes:
-      - /Users/liujuguang/Workspaces/music:/music
-      - /Users/liujuguang/Workspaces/music/covers:/var/www/html/public/img/covers
+      - ./.data/music:/music
+      - ./.data/music-search:/var/www/html/storage/search-indexes
 
   database:
-    image: mysql/mysql-server:5.7
+    image: mysql:8
     container_name: "koel_mysql"
     restart: always
+    security_opt:
+      - seccomp:unconfined
     volumes:
-      - db:/var/lib/mysql
+      - /etc/localtime:/etc/localtime
+      - ./.data/database/mysql/data:/var/lib/mysql
+      - ./.data/database/mysql/mysql-files:/var/lib/mysql-files/
+      - ./.data/database/mysql/logs/:/data/mysql/logs/
+      - ./my.cnf:/etc/mysql/my.cnf
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: koel
@@ -75,11 +82,3 @@ services:
       - PMA_HOST=database
       - PMA_USER=koel
       - PMA_PASSWORD=koel
-
-volumes:
-  db:
-    driver: local
-  music:
-    driver: local
-  covers:
-    driver: local
